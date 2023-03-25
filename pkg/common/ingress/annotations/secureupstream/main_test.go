@@ -26,13 +26,14 @@ import (
 	"fmt"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/resolver"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func buildIngress() *extensions.Ingress {
+    svc := extensions.IngressServiceBackend{
+    	Name: "default-backend",
+    	Port: extensions.ServiceBackendPort{Number: 80},
+    }
 	defaultBackend := extensions.IngressBackend{
-		ServiceName: "default-backend",
-		ServicePort: intstr.FromInt(80),
 	}
 
 	return &extensions.Ingress{
@@ -41,9 +42,8 @@ func buildIngress() *extensions.Ingress {
 			Namespace: api.NamespaceDefault,
 		},
 		Spec: extensions.IngressSpec{
-			Backend: &extensions.IngressBackend{
-				ServiceName: "default-backend",
-				ServicePort: intstr.FromInt(80),
+			DefaultBackend: &extensions.IngressBackend{
+                Service: &svc,
 			},
 			Rules: []extensions.IngressRule{
 				{

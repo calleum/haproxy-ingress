@@ -111,8 +111,8 @@ func (c *converter) syncIngress(ing *extensions.Ingress) {
 		Type:      "ingress",
 	}
 	annHost, annBack := c.readAnnotations(ing.Annotations)
-	if ing.Spec.Backend != nil {
-		svcName, svcPort := readServiceNamePort(ing.Spec.Backend)
+	if ing.Spec.DefaultBackend != nil {
+		svcName, svcPort := readServiceNamePort(ing.Spec.DefaultBackend)
 		err := c.addDefaultHostBackend(source, ing.Namespace+"/"+svcName, svcPort, annHost, annBack)
 		if err != nil {
 			c.logger.Warn("skipping default backend of ingress '%s': %v", fullIngName, err)
@@ -343,7 +343,7 @@ func (c *converter) readAnnotations(annotations map[string]string) (annHost, ann
 }
 
 func readServiceNamePort(backend *extensions.IngressBackend) (string, string) {
-	serviceName := backend.ServiceName
-	servicePort := backend.ServicePort.String()
+	serviceName := backend.Service.Name
+	servicePort := backend.Service.Port.String()
 	return serviceName, servicePort
 }

@@ -24,14 +24,15 @@ import (
 	api "k8s.io/api/core/v1"
 	extensions "k8s.io/api/networking/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func buildIngress() *extensions.Ingress {
+    svc := extensions.IngressServiceBackend{
+    	Name: "default-backend",
+    	Port: extensions.ServiceBackendPort{Number: 80},
+    }
 	defaultBackend := extensions.IngressBackend{
-		ServiceName: "default-backend",
-		ServicePort: intstr.FromInt(80),
+        Service: &svc,
 	}
 
 	return &extensions.Ingress{
@@ -40,9 +41,8 @@ func buildIngress() *extensions.Ingress {
 			Namespace: api.NamespaceDefault,
 		},
 		Spec: extensions.IngressSpec{
-			Backend: &extensions.IngressBackend{
-				ServiceName: "default-backend",
-				ServicePort: intstr.FromInt(80),
+			DefaultBackend: &extensions.IngressBackend{
+                Service: &svc,
 			},
 			Rules: []extensions.IngressRule{
 				{

@@ -154,7 +154,7 @@ func TestSyncSecret(t *testing.T) {
 		expectSuccess bool
 	}{
 		{"getPemCertificate_error", "default/foo_secret", map[string][]byte{apiv1.TLSPrivateKeyKey: dKey}, false},
-		{"normal_test", "default/foo_secret", map[string][]byte{api.TLSCertKey: dCrt, apiv1.TLSPrivateKeyKey: dKey, tlscaName: dCa}, true},
+		{"normal_test", "default/foo_secret", map[string][]byte{apiv1.TLSCertKey: dCrt, apiv1.TLSPrivateKeyKey: dKey, tlscaName: dCa}, true},
 	}
 
 	for _, foo := range foos {

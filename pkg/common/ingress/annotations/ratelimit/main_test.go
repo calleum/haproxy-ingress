@@ -24,13 +24,16 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/defaults"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func buildIngress() *extensions.Ingress {
+    svc := extensions.IngressServiceBackend{
+    	Name: "default-backend",
+    	Port: extensions.ServiceBackendPort{Number: 80},
+    }
+
 	defaultBackend := extensions.IngressBackend{
-		ServiceName: "default-backend",
-		ServicePort: intstr.FromInt(80),
+        Service: &svc,
 	}
 
 	return &extensions.Ingress{
@@ -39,9 +42,8 @@ func buildIngress() *extensions.Ingress {
 			Namespace: api.NamespaceDefault,
 		},
 		Spec: extensions.IngressSpec{
-			Backend: &extensions.IngressBackend{
-				ServiceName: "default-backend",
-				ServicePort: intstr.FromInt(80),
+			DefaultBackend: &extensions.IngressBackend{
+                Service: &svc,
 			},
 			Rules: []extensions.IngressRule{
 				{

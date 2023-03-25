@@ -17,6 +17,7 @@ limitations under the License.
 package status
 
 import (
+	"context"
 	"os"
 	"testing"
 	"time"
@@ -81,7 +82,7 @@ func buildSimpleClientSet() *testclient.Clientset {
 			{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo3",
-					Namespace: api.NamespaceSystem,
+					Namespace: metav1.NamespaceSystem,
 					Labels: map[string]string{
 						"lable_sig": "foo_pod",
 					},
@@ -182,7 +183,7 @@ func buildExtensionsIngresses() []extensions.Ingress {
 		{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "foo_ingress_different_class",
-				Namespace: api.NamespaceDefault,
+				Namespace: apiv1.NamespaceDefault,
 				Annotations: map[string]string{
 					class.IngressKey: "no-nginx",
 				},
@@ -256,6 +257,7 @@ func buildStatusSync() statusSync {
 }
 
 func TestStatusActions(t *testing.T) {
+    ctx := context.Background()
 	// make sure election can be created
 	os.Setenv("POD_NAME", "foo1")
 	os.Setenv("POD_NAMESPACE", apiv1.NamespaceDefault)
@@ -290,7 +292,7 @@ func TestStatusActions(t *testing.T) {
 	newIPs := []apiv1.LoadBalancerIngress{{
 		IP: "11.0.0.2",
 	}}
-	fooIngress1, err1 := fk.Client.Extensions().Ingresses(apiv1.NamespaceDefault).Get("foo_ingress_1", metav1.GetOptions{})
+	fooIngress1, err1 := fk.Client.NetworkingV1().Ingresses(apiv1.NamespaceDefault).Get(ctx, "foo_ingress_1", metav1.GetOptions{})
 	if err1 != nil {
 		t.Fatalf("unexpected error")
 	}
@@ -303,7 +305,7 @@ func TestStatusActions(t *testing.T) {
 	fk.Shutdown()
 	// ingress should be empty
 	newIPs2 := []apiv1.LoadBalancerIngress{}
-	fooIngress2, err2 := fk.Client.Extensions().Ingresses(apiv1.NamespaceDefault).Get("foo_ingress_1", metav1.GetOptions{})
+	fooIngress2, err2 := fk.Client.NetworkingV1().Ingresses(apiv1.NamespaceDefault).Get(ctx, "foo_ingress_1", metav1.GetOptions{})
 	if err2 != nil {
 		t.Fatalf("unexpected error")
 	}

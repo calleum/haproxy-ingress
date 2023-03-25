@@ -32,7 +32,6 @@ import (
 
 	apiv1 "k8s.io/api/core/v1"
 	extensions "k8s.io/api/networking/v1"
-	"k8s.io/apimachinery/pkg/conversion"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -77,8 +76,6 @@ var (
 
 	fakeCertificatePath = ""
 	fakeCertificateSHA  = ""
-
-	cloner = conversion.NewCloner()
 )
 
 // GenericController holds the boilerplate code required to build an Ingress controlller.
@@ -201,8 +198,6 @@ func newIngressController(config *Configuration) *GenericController {
 	ic.annotations = newAnnotationExtractor(&ic)
 
 	ic.cfg.Backend.SetListers(ic.listers)
-
-	cloner.RegisterDeepCopyFunc(ingress.GetGeneratedDeepCopyFuncs)
 
 	return &ic
 }
@@ -582,11 +577,11 @@ func (ic *GenericController) getBackendServers(ingresses []*extensions.Ingress) 
 
 		ctx := ic.createBackendContext(ing)
 
-		if ing.Spec.Backend != nil {
+		if ing.Spec.DefaultBackend != nil {
 			upsName := fmt.Sprintf("%v-%v-%v",
 				ing.GetNamespace(),
-				ing.Spec.Backend.ServiceName,
-				ing.Spec.Backend.ServicePort.String())
+				ing.Spec.DefaultBackend.Service.Name,
+				ing.Spec.DefaultBackend.Service.Port.String())
 			ctx.copyBackendAnnotations(upstreams[upsName])
 		}
 
@@ -624,8 +619,8 @@ func (ic *GenericController) getBackendServers(ingresses []*extensions.Ingress) 
 			for _, path := range rule.HTTP.Paths {
 				upsName := fmt.Sprintf("%v-%v-%v",
 					ing.GetNamespace(),
-					path.Backend.ServiceName,
-					path.Backend.ServicePort.String())
+					path.Backend.Service.Name,
+					path.Backend.Service.Port.String())
 
 				ups, found := upstreams[upsName]
 				if !found {
@@ -635,9 +630,9 @@ func (ic *GenericController) getBackendServers(ingresses []*extensions.Ingress) 
 
 				var upshttpPassName string
 				if httpPort := server.SSLPassthrough.HTTPPort; server.SSLPassthrough.HasSSLPassthrough && httpPort > 0 {
-					if httpPort != path.Backend.ServicePort.IntValue() {
+					if httpPort != int(path.Backend.Service.Port.Number) {
 						upshttpPassName = fmt.Sprintf("%v-%v-%v",
-							ing.GetNamespace(), path.Backend.ServiceName, httpPort)
+							ing.GetNamespace(), path.Backend.Service.Name, httpPort)
 						ctx.copyBackendAnnotations(upstreams[upshttpPassName])
 					} else {
 						// cannot reuse the same port on ssl-passthrough (https) and http
@@ -914,20 +909,20 @@ func (ic *GenericController) createUpstreams(data []*extensions.Ingress, du *ing
 		sslpt := ic.annotations.SSLPassthrough(ing)
 
 		var defBackend string
-		if ing.Spec.Backend != nil {
+		if ing.Spec.DefaultBackend != nil {
 			defBackend = fmt.Sprintf("%v-%v-%v",
 				ing.GetNamespace(),
-				ing.Spec.Backend.ServiceName,
-				ing.Spec.Backend.ServicePort.String())
+				ing.Spec.DefaultBackend.Service.Name,
+				ing.Spec.DefaultBackend.Service.Port.String())
 
 			glog.V(3).Infof("creating upstream %v", defBackend)
 			upstreams[defBackend] = newUpstream(defBackend)
-			svcKey := fmt.Sprintf("%v/%v", ing.GetNamespace(), ing.Spec.Backend.ServiceName)
+			svcKey := fmt.Sprintf("%v/%v", ing.GetNamespace(), ing.Spec.DefaultBackend.Service.Name)
 
 			// Add the service cluster endpoint as the upstream instead of individual endpoints
 			// if the serviceUpstream annotation is enabled
 			if serviceUpstream {
-				endpoint, err := ic.getServiceClusterEndpoint(svcKey, ing.Spec.Backend)
+				endpoint, err := ic.getServiceClusterEndpoint(svcKey, ing.Spec.DefaultBackend)
 				if err != nil {
 					glog.Errorf("Failed to get service cluster endpoint for service %s: %v", svcKey, err)
 				} else {
@@ -936,7 +931,7 @@ func (ic *GenericController) createUpstreams(data []*extensions.Ingress, du *ing
 			}
 
 			if len(upstreams[defBackend].Endpoints) == 0 {
-				endps, err := ic.serviceEndpoints(svcKey, ing.Spec.Backend.ServicePort.String())
+				endps, err := ic.serviceEndpoints(svcKey, ing.Spec.DefaultBackend.Service.Port.String())
 				upstreams[defBackend].Endpoints = append(upstreams[defBackend].Endpoints, endps...)
 				if err != nil {
 					glog.Warningf("error creating upstream %v: %v", defBackend, err)
@@ -960,9 +955,14 @@ func (ic *GenericController) createUpstreams(data []*extensions.Ingress, du *ing
 						continue
 					}
 					if sslpt.HTTPPort > 0 {
+                        ingBackendSvc := extensions.IngressServiceBackend{ 
+                            Name: path.Backend.Service.Name,
+                            Port: extensions.ServiceBackendPort{
+                            	Number: int32(sslpt.HTTPPort),
+                            },
+                        }
 						backends = append(backends, extensions.IngressBackend{
-							ServiceName: path.Backend.ServiceName,
-							ServicePort: intstr.FromInt(sslpt.HTTPPort),
+                            Service: &ingBackendSvc,
 						})
 					}
 				}
@@ -974,8 +974,8 @@ func (ic *GenericController) createUpstreams(data []*extensions.Ingress, du *ing
 				for _, backend := range backends {
 					name := fmt.Sprintf("%v-%v-%v",
 						ing.GetNamespace(),
-						backend.ServiceName,
-						backend.ServicePort.String())
+						backend.Service.Name,
+						backend.Service.Port.String())
 
 					if _, ok := upstreams[name]; ok {
 						continue
@@ -983,7 +983,7 @@ func (ic *GenericController) createUpstreams(data []*extensions.Ingress, du *ing
 
 					glog.V(3).Infof("creating upstream %v", name)
 					upstreams[name] = newUpstream(name)
-					upstreams[name].Port = backend.ServicePort
+					upstreams[name].Port = intstr.FromInt(int(backend.Service.Port.Number))
 
 					if secUpstream != nil && !upstreams[name].Secure.IsSecure {
 						upstreams[name].Secure = *secUpstream
@@ -993,7 +993,7 @@ func (ic *GenericController) createUpstreams(data []*extensions.Ingress, du *ing
 						upstreams[name].UpstreamHashBy = upstreamHashBy
 					}
 
-					svcKey := fmt.Sprintf("%v/%v", ing.GetNamespace(), backend.ServiceName)
+					svcKey := fmt.Sprintf("%v/%v", ing.GetNamespace(), backend.Service.Name)
 
 					// Add the service cluster endpoint as the upstream instead of individual endpoints
 					// if the serviceUpstream annotation is enabled
@@ -1007,7 +1007,7 @@ func (ic *GenericController) createUpstreams(data []*extensions.Ingress, du *ing
 					}
 
 					if len(upstreams[name].Endpoints) == 0 {
-						endp, err := ic.serviceEndpoints(svcKey, backend.ServicePort.String())
+						endp, err := ic.serviceEndpoints(svcKey, backend.Service.Port.String())
 						if err != nil {
 							glog.Warningf("error obtaining service endpoints: %v", err)
 							continue
@@ -1046,20 +1046,20 @@ func (ic *GenericController) getServiceClusterEndpoint(svcKey string, backend *e
 
 	// If the service port in the ingress uses a name, lookup
 	// the actual port in the service spec
-	if backend.ServicePort.Type == intstr.String {
+	if backend.Service.Port.Name != "" {
 		var port int32 = -1
 		for _, svcPort := range svc.Spec.Ports {
-			if svcPort.Name == backend.ServicePort.String() {
+			if svcPort.Name == backend.Service.Port.Name {
 				port = svcPort.Port
 				break
 			}
 		}
 		if port == -1 {
-			return endpoint, fmt.Errorf("no port mapped for service %s and port name %s", svc.Name, backend.ServicePort.String())
+			return endpoint, fmt.Errorf("no port mapped for service %s and port name %s", svc.Name, backend.Service.Port.Name)
 		}
 		endpoint.Port = fmt.Sprintf("%d", port)
 	} else {
-		endpoint.Port = backend.ServicePort.String()
+		endpoint.Port = string(backend.Service.Port.Number)
 	}
 
 	return endpoint, err
@@ -1209,9 +1209,9 @@ func (ic *GenericController) createServers(data []*extensions.Ingress,
 		// default upstream server
 		un := du.Name
 
-		if ing.Spec.Backend != nil {
+		if ing.Spec.DefaultBackend != nil {
 			// replace default backend
-			defUpstream := fmt.Sprintf("%v-%v-%v", ing.GetNamespace(), ing.Spec.Backend.ServiceName, ing.Spec.Backend.ServicePort.String())
+			defUpstream := fmt.Sprintf("%v-%v-%v", ing.GetNamespace(), ing.Spec.DefaultBackend.Service.Name, ing.Spec.DefaultBackend.Service.Port.Number)
 			if backendUpstream, ok := upstreams[defUpstream]; ok {
 				un = backendUpstream.Name
 

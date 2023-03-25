@@ -1240,7 +1240,7 @@ func (c *testConfig) createIng1(name, hostname, path, service string) *extension
 	sname := strings.Split(name, "/")
 	sservice := strings.Split(service, ":")
 	return c.createObject(`
-apiVersion: networking/v1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ` + sname[1] + `
@@ -1252,8 +1252,10 @@ spec:
       paths:
       - path: ` + path + `
         backend:
-          serviceName: ` + sservice[0] + `
-          servicePort: ` + sservice[1]).(*extensions.Ingress)
+          service:
+            name: ` + sservice[0] + `
+            port:
+              number: ` + sservice[1]).(*extensions.Ingress)
 }
 
 func (c *testConfig) createIng1Ann(name, hostname, path, service string, ann map[string]string) *extensions.Ingress {
@@ -1266,7 +1268,7 @@ func (c *testConfig) createIng2(name, service string) *extensions.Ingress {
 	sname := strings.Split(name, "/")
 	sservice := strings.Split(service, ":")
 	return c.createObject(`
-apiVersion: networking/v1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ` + sname[1] + `
@@ -1286,7 +1288,7 @@ func (c *testConfig) createIng2Ann(name, service string, ann map[string]string) 
 func (c *testConfig) createIng3(name string) *extensions.Ingress {
 	sname := strings.Split(name, "/")
 	return c.createObject(`
-apiVersion: networking/v1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ` + sname[1] + `

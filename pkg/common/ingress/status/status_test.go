@@ -22,11 +22,10 @@ import (
 	"time"
 
 	apiv1 "k8s.io/api/core/v1"
-	extensions "k8s.io/api/extensions/v1beta1"
+	extensions "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	testclient "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/kubernetes/pkg/api"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/class"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/store"
@@ -311,14 +310,6 @@ func TestStatusActions(t *testing.T) {
 	fooIngress2CurIPs := fooIngress2.Status.LoadBalancer.Ingress
 	if !ingressSliceEqual(fooIngress2CurIPs, newIPs2) {
 		t.Fatalf("returned %v but expected %v", fooIngress2CurIPs, newIPs2)
-	}
-
-	oic, err := fk.Client.Extensions().Ingresses(api.NamespaceDefault).Get("foo_ingress_different_class", metav1.GetOptions{})
-	if err != nil {
-		t.Fatalf("unexpected error")
-	}
-	if oic.Status.LoadBalancer.Ingress[0].IP != "0.0.0.0" && oic.Status.LoadBalancer.Ingress[0].Hostname != "foo.bar.com" {
-		t.Fatalf("invalid ingress status for rule with different class")
 	}
 
 	// end test

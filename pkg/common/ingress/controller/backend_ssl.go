@@ -24,7 +24,7 @@ import (
 	"github.com/golang/glog"
 
 	apiv1 "k8s.io/api/core/v1"
-	extensions "k8s.io/api/extensions/v1beta1"
+	extensions "k8s.io/api/networking/v1"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress"

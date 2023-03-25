@@ -72,7 +72,7 @@ Configure the ingress resource. No need to change the host below, `bluegreen.exa
 
 ```
 $ kubectl create -f - <<EOF
-apiVersion: extensions/v1beta1
+apiVersion: networking/v1
 kind: Ingress
 metadata:
   annotations:

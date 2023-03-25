@@ -17,6 +17,7 @@ limitations under the License.
 package k8s
 
 import (
+    "context"
 	"fmt"
 	"os"
 	"strings"
@@ -38,7 +39,8 @@ func ParseNameNS(input string) (string, string, error) {
 
 // GetNodeIP returns the IP address of a node in the cluster
 func GetNodeIP(kubeClient clientset.Interface, name string, useInternalIP bool) string {
-	node, err := kubeClient.Core().Nodes().Get(name, metav1.GetOptions{})
+    ctx := context.Background()
+	node, err := kubeClient.CoreV1().Nodes().Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return ""
 	}
@@ -76,6 +78,7 @@ type PodInfo struct {
 // GetPodDetails returns runtime information about the pod:
 // name, namespace and IP of the node where it is running
 func GetPodDetails(kubeClient clientset.Interface) (*PodInfo, error) {
+    ctx := context.Background()
 	podName := os.Getenv("POD_NAME")
 	podNs := os.Getenv("POD_NAMESPACE")
 
@@ -83,7 +86,7 @@ func GetPodDetails(kubeClient clientset.Interface) (*PodInfo, error) {
 		return nil, fmt.Errorf("unable to get POD information (missing POD_NAME or POD_NAMESPACE environment variable")
 	}
 
-	pod, _ := kubeClient.Core().Pods(podNs).Get(podName, metav1.GetOptions{})
+	pod, _ := kubeClient.CoreV1().Pods(podNs).Get(ctx, podName, metav1.GetOptions{})
 	if pod == nil {
 		return nil, fmt.Errorf("unable to get POD information")
 	}

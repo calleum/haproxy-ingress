@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
-	extensions "k8s.io/api/extensions/v1beta1"
+	extensions "k8s.io/api/networking/v1"
 	"regexp"
 	"strings"
 )
@@ -79,7 +79,7 @@ func (a oauth) Parse(ing *extensions.Ingress) (interface{}, error) {
 		return &Config{}, fmt.Errorf("path '%v' was not found on %v/%v", uriPrefix, ing.Namespace, ing.Name)
 	}
 	// TODO this is a controller construction
-	backendName := fmt.Sprintf("%s-%s-%s", ing.Namespace, backend.ServiceName, backend.ServicePort.String())
+	backendName := fmt.Sprintf("%s-%s-%s", ing.Namespace, backend.Service.Name, backend.Service.Port.String())
 	headersMap := make(map[string]string, len(headers))
 	for _, header := range headers {
 		if len(header) == 0 {

@@ -17,18 +17,21 @@ limitations under the License.
 package k8s
 
 import (
+    "context"
 	api "k8s.io/api/core/v1"
 	core "k8s.io/api/core/v1"
-	extensions "k8s.io/api/extensions/v1beta1"
+	extensions "k8s.io/api/networking/v1"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
+    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
 func EnsureSecret(cl kubernetes.Interface, secret *api.Secret) (*api.Secret, error) {
-	s, err := cl.CoreV1().Secrets(secret.Namespace).Create(secret)
+    ctx := context.Background()
+	s, err := cl.CoreV1().Secrets(secret.Namespace).Create(ctx, secret, metav1.CreateOptions{})
 	if err != nil {
 		if k8sErrors.IsAlreadyExists(err) {
-			return cl.CoreV1().Secrets(secret.Namespace).Update(secret)
+			return cl.CoreV1().Secrets(secret.Namespace).Update(ctx, secret, metav1.UpdateOptions{})
 		}
 		return nil, err
 	}
@@ -36,10 +39,11 @@ func EnsureSecret(cl kubernetes.Interface, secret *api.Secret) (*api.Secret, err
 }
 
 func EnsureIngress(cl kubernetes.Interface, ingress *extensions.Ingress) (*extensions.Ingress, error) {
-	s, err := cl.ExtensionsV1beta1().Ingresses(ingress.Namespace).Update(ingress)
+    ctx := context.Background()
+	s, err := cl.NetworkingV1().Ingresses(ingress.Namespace).Update(ctx, ingress, metav1.UpdateOptions{})
 	if err != nil {
 		if k8sErrors.IsNotFound(err) {
-			return cl.ExtensionsV1beta1().Ingresses(ingress.Namespace).Create(ingress)
+			return cl.NetworkingV1().Ingresses(ingress.Namespace).Create(ctx, ingress, metav1.CreateOptions{})
 		}
 		return nil, err
 	}
@@ -47,10 +51,11 @@ func EnsureIngress(cl kubernetes.Interface, ingress *extensions.Ingress) (*exten
 }
 
 func EnsureService(cl kubernetes.Interface, service *core.Service) (*core.Service, error) {
-	s, err := cl.CoreV1().Services(service.Namespace).Update(service)
+    ctx := context.Background()
+	s, err := cl.CoreV1().Services(service.Namespace).Update(ctx, service, metav1.UpdateOptions{})
 	if err != nil {
 		if k8sErrors.IsNotFound(err) {
-			return cl.CoreV1().Services(service.Namespace).Create(service)
+			return cl.CoreV1().Services(service.Namespace).Create(ctx, service, metav1.CreateOptions{})
 		}
 		return nil, err
 	}

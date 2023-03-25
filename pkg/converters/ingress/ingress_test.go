@@ -23,7 +23,7 @@ import (
 	"github.com/kylelemons/godebug/diff"
 	yaml "gopkg.in/yaml.v2"
 	api "k8s.io/api/core/v1"
-	extensions "k8s.io/api/extensions/v1beta1"
+	extensions "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -1240,7 +1240,7 @@ func (c *testConfig) createIng1(name, hostname, path, service string) *extension
 	sname := strings.Split(name, "/")
 	sservice := strings.Split(service, ":")
 	return c.createObject(`
-apiVersion: extensions/v1beta1
+apiVersion: networking/v1
 kind: Ingress
 metadata:
   name: ` + sname[1] + `
@@ -1266,7 +1266,7 @@ func (c *testConfig) createIng2(name, service string) *extensions.Ingress {
 	sname := strings.Split(name, "/")
 	sservice := strings.Split(service, ":")
 	return c.createObject(`
-apiVersion: extensions/v1beta1
+apiVersion: networking/v1
 kind: Ingress
 metadata:
   name: ` + sname[1] + `
@@ -1286,7 +1286,7 @@ func (c *testConfig) createIng2Ann(name, service string, ann map[string]string) 
 func (c *testConfig) createIng3(name string) *extensions.Ingress {
 	sname := strings.Split(name, "/")
 	return c.createObject(`
-apiVersion: extensions/v1beta1
+apiVersion: networking/v1
 kind: Ingress
 metadata:
   name: ` + sname[1] + `

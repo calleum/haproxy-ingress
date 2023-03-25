@@ -107,7 +107,7 @@ From now the optional web app should be deployed. Deploy an ingress resource to 
 
 ```console
 $ kubectl --namespace=ingress-controller create -f - <<EOF
-apiVersion: extensions/v1beta1
+apiVersion: networking/v1
 kind: Ingress
 metadata:
   name: app

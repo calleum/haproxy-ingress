@@ -32,7 +32,7 @@ import (
 	"github.com/spf13/pflag"
 
 	apiv1 "k8s.io/api/core/v1"
-	extensions "k8s.io/api/extensions/v1beta1"
+	extensions "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apiserver/pkg/server/healthz"
 
@@ -67,7 +67,7 @@ var (
 type Controller interface {
 	// HealthzChecker returns is a named healthz check that returns the ingress
 	// controller status
-	healthz.HealthzChecker
+	healthz.HealthChecker
 
 	// OnUpdate callback invoked from the sync queue https://k8s.io/ingress/core/blob/master/pkg/ingress/controller/controller.go#L387
 	// when an update occurs. This is executed frequently because Ingress

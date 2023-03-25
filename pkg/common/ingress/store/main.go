@@ -21,7 +21,6 @@ import (
 
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/kubernetes/pkg/util/node"
 )
 
 // IngressLister makes a Store that lists Ingress.
@@ -132,7 +131,7 @@ func isTerminatingServicePod(svc *apiv1.Service, pod *apiv1.Pod) (termSvcPod boo
 			return
 		}
 	}
-	if pod.DeletionTimestamp != nil && pod.Status.Reason != node.NodeUnreachablePodReason && pod.Status.PodIP != "" {
+	if pod.DeletionTimestamp != nil && pod.Status.Reason != "NodeLost" && pod.Status.PodIP != "" {
 		termSvcPod = true
 	}
 	return

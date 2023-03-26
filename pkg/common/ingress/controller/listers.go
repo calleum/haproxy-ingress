@@ -236,7 +236,7 @@ func (ic *GenericController) createListers(disableNodeLister bool) (*ingress.Sto
 	controller := &cacheController{}
 
 	lister.Ingress.Store, controller.Ingress = cache.NewInformer(
-		cache.NewListWatchFromClient(ic.cfg.Client.ExtensionsV1beta1().RESTClient(), "ingresses", ic.cfg.Namespace, fields.Everything()),
+		cache.NewListWatchFromClient(ic.cfg.Client.NetworkingV1().RESTClient(), "ingresses", ic.cfg.Namespace, fields.Everything()),
 		&networking.Ingress{}, ic.cfg.ResyncPeriod, ingEventHandler)
 
 	lister.Endpoint.Store, controller.Endpoint = cache.NewInformer(

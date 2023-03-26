@@ -17,7 +17,7 @@ limitations under the License.
 package clientbodybuffersize
 
 import (
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 )
@@ -36,6 +36,6 @@ func NewParser() parser.IngressAnnotation {
 
 // Parse parses the annotations contained in the ingress rule
 // used to add an client-body-buffer-size to the provided locations
-func (a clientBodyBufferSize) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a clientBodyBufferSize) Parse(ing *networking.Ingress) (interface{}, error) {
 	return parser.GetStringAnnotation(annotation, ing)
 }

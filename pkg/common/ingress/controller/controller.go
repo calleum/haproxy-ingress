@@ -31,7 +31,7 @@ import (
 	"github.com/golang/glog"
 
 	apiv1 "k8s.io/api/core/v1"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -277,7 +277,7 @@ func (ic *GenericController) syncIngress(item interface{}) error {
 	if element, ok := item.(task.Element); ok {
 		if name, ok := element.Key.(string); ok {
 			if obj, exists, _ := ic.listers.Ingress.GetByKey(name); exists {
-				ing := obj.(*extensions.Ingress)
+				ing := obj.(*networking.Ingress)
 				ic.readSecrets(ing)
 			}
 		}
@@ -286,15 +286,15 @@ func (ic *GenericController) syncIngress(item interface{}) error {
 	// Sort ingress rules using the ResourceVersion field
 	ings := ic.listers.Ingress.List()
 	sort.SliceStable(ings, func(i, j int) bool {
-		ir := ings[i].(*extensions.Ingress).ResourceVersion
-		jr := ings[j].(*extensions.Ingress).ResourceVersion
+		ir := ings[i].(*networking.Ingress).ResourceVersion
+		jr := ings[j].(*networking.Ingress).ResourceVersion
 		return ir < jr
 	})
 
 	// filter ingress rules
-	var ingresses []*extensions.Ingress
+	var ingresses []*networking.Ingress
 	for _, ingIf := range ings {
-		ing := ingIf.(*extensions.Ingress)
+		ing := ingIf.(*networking.Ingress)
 		if !class.IsValid(ing, ic.cfg.IngressClass, ic.cfg.DefaultIngressClass) {
 			continue
 		}
@@ -538,7 +538,7 @@ func (ic *GenericController) getDefaultUpstream() *ingress.Backend {
 }
 
 type backendContext struct {
-	ing         *extensions.Ingress
+	ing         *networking.Ingress
 	affinity    *sessionaffinity.AffinityConfig
 	balance     string
 	blueGreen   *bluegreen.Config
@@ -551,7 +551,7 @@ type backendContext struct {
 	agentCheck  *agentcheck.Config
 }
 
-func (ic *GenericController) createBackendContext(ing *extensions.Ingress) *backendContext {
+func (ic *GenericController) createBackendContext(ing *networking.Ingress) *backendContext {
 	return &backendContext{
 		affinity:    ic.annotations.SessionAffinity(ing),
 		balance:     ic.annotations.BalanceAlgorithm(ing),
@@ -568,7 +568,7 @@ func (ic *GenericController) createBackendContext(ing *extensions.Ingress) *back
 
 // getBackendServers returns a list of Upstream and Server to be used by the backend
 // An upstream can be used in multiple servers if the namespace, service name and port are the same
-func (ic *GenericController) getBackendServers(ingresses []*extensions.Ingress) ([]*ingress.Backend, []*ingress.Server) {
+func (ic *GenericController) getBackendServers(ingresses []*networking.Ingress) ([]*ingress.Backend, []*ingress.Server) {
 	du := ic.getDefaultUpstream()
 	upstreams := ic.createUpstreams(ingresses, du)
 	servers := ic.createServers(ingresses, upstreams, du)
@@ -898,7 +898,7 @@ func (ic GenericController) GetFullResourceName(name, currentNamespace string) s
 
 // createUpstreams creates the NGINX upstreams for each service referenced in
 // Ingress rules. The servers inside the upstream are endpoints.
-func (ic *GenericController) createUpstreams(data []*extensions.Ingress, du *ingress.Backend) map[string]*ingress.Backend {
+func (ic *GenericController) createUpstreams(data []*networking.Ingress, du *ingress.Backend) map[string]*ingress.Backend {
 	upstreams := make(map[string]*ingress.Backend)
 	upstreams[defUpstreamName] = du
 
@@ -946,7 +946,7 @@ func (ic *GenericController) createUpstreams(data []*extensions.Ingress, du *ing
 			}
 
 			for _, path := range rule.HTTP.Paths {
-				backends := []extensions.IngressBackend{path.Backend}
+				backends := []networking.IngressBackend{path.Backend}
 				if sslpt.HasSSLPassthrough {
 					if path.Path != "" && path.Path != rootLocation {
 						glog.Warningf(
@@ -955,13 +955,13 @@ func (ic *GenericController) createUpstreams(data []*extensions.Ingress, du *ing
 						continue
 					}
 					if sslpt.HTTPPort > 0 {
-                        ingBackendSvc := extensions.IngressServiceBackend{ 
+                        ingBackendSvc := networking.IngressServiceBackend{ 
                             Name: path.Backend.Service.Name,
-                            Port: extensions.ServiceBackendPort{
+                            Port: networking.ServiceBackendPort{
                             	Number: int32(sslpt.HTTPPort),
                             },
                         }
-						backends = append(backends, extensions.IngressBackend{
+						backends = append(backends, networking.IngressBackend{
                             Service: &ingBackendSvc,
 						})
 					}
@@ -1030,7 +1030,7 @@ func (ic *GenericController) createUpstreams(data []*extensions.Ingress, du *ing
 	return upstreams
 }
 
-func (ic *GenericController) getServiceClusterEndpoint(svcKey string, backend *extensions.IngressBackend) (endpoint ingress.Endpoint, err error) {
+func (ic *GenericController) getServiceClusterEndpoint(svcKey string, backend *networking.IngressBackend) (endpoint ingress.Endpoint, err error) {
 	svcObj, svcExists, err := ic.listers.Service.GetByKey(svcKey)
 
 	if !svcExists {
@@ -1142,7 +1142,7 @@ func (ic *GenericController) serviceEndpoints(svcKey, backendPort string) ([]ing
 // FDQN referenced by ingress rules and the common name field in the referenced
 // SSL certificates. Each server is configured with location / using a default
 // backend specified by the user or the one inside the ingress spec.
-func (ic *GenericController) createServers(data []*extensions.Ingress,
+func (ic *GenericController) createServers(data []*networking.Ingress,
 	upstreams map[string]*ingress.Backend,
 	du *ingress.Backend) map[string]*ingress.Server {
 
@@ -1533,7 +1533,7 @@ func addIngressEndpoint(addresses []apiv1.EndpointAddress,
 }
 
 // readSecrets extracts information about secrets from an Ingress rule
-func (ic *GenericController) readSecrets(ing *extensions.Ingress) {
+func (ic *GenericController) readSecrets(ing *networking.Ingress) {
 	for _, tls := range ing.Spec.TLS {
 		if tls.SecretName != "" {
 			key := ic.GetFullResourceName(tls.SecretName, ing.Namespace)
@@ -1580,7 +1580,7 @@ func (ic *GenericController) Start() {
 		// initial sync of secrets to avoid unnecessary reloads
 		glog.Info("running initial sync of secrets")
 		for _, obj := range ic.listers.Ingress.List() {
-			ing := obj.(*extensions.Ingress)
+			ing := obj.(*networking.Ingress)
 
 			if !class.IsValid(ing, ic.cfg.IngressClass, ic.cfg.DefaultIngressClass) {
 				a, _ := parser.GetStringAnnotation(class.IngressKey, ing)
@@ -1603,7 +1603,7 @@ func (ic *GenericController) Start() {
 	}
 
 	// force initial sync
-	ic.syncQueue.Enqueue(&extensions.Ingress{})
+	ic.syncQueue.Enqueue(&networking.Ingress{})
 
 	<-ic.stopCh
 }
@@ -1616,7 +1616,7 @@ func (ic *GenericController) isForceReload() bool {
 func (ic *GenericController) SetForceReload(shouldReload bool) {
 	if shouldReload {
 		atomic.StoreInt32(&ic.forceReload, 1)
-		ic.syncQueue.Enqueue(&extensions.Ingress{})
+		ic.syncQueue.Enqueue(&networking.Ingress{})
 	} else {
 		atomic.StoreInt32(&ic.forceReload, 0)
 	}

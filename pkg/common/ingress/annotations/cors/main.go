@@ -19,7 +19,7 @@ package cors
 import (
 	"regexp"
 
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 )
@@ -107,7 +107,7 @@ func (c1 *CorsConfig) Equal(c2 *CorsConfig) bool {
 
 // Parse parses the annotations contained in the ingress
 // rule used to indicate if the location/s should allows CORS
-func (a cors) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a cors) Parse(ing *networking.Ingress) (interface{}, error) {
 	corsenabled, err := parser.GetBoolAnnotation(annotationCorsEnabled, ing)
 	if err != nil {
 		corsenabled, _ = parser.GetBoolAnnotation(annotationCorsEnabledDepr, ing)

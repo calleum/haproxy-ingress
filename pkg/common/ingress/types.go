@@ -32,7 +32,7 @@ import (
 	"github.com/spf13/pflag"
 
 	apiv1 "k8s.io/api/core/v1"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apiserver/pkg/server/healthz"
 
@@ -114,7 +114,7 @@ type Controller interface {
 	// UpdateIngressStatus custom callback used to update the status in an Ingress rule
 	// This allows custom implementations
 	// If the function returns nil the standard functions will be executed.
-	UpdateIngressStatus(*extensions.Ingress) []apiv1.LoadBalancerIngress
+	UpdateIngressStatus(*networking.Ingress) []apiv1.LoadBalancerIngress
 	// DefaultEndpoint returns the Endpoint to use as default when the
 	// referenced service does not exists. This should return the content
 	// of to the default backend
@@ -323,7 +323,7 @@ type Location struct {
 	// uses the default backend.
 	IsDefBackend bool `json:"isDefBackend"`
 	// Ingress returns the ingress from which this location was generated
-	Ingress *extensions.Ingress `json:"ingress"`
+	Ingress *networking.Ingress `json:"ingress"`
 	// Backend describes the name of the backend to use.
 	Backend string `json:"backend"`
 	// HTTPPassBackend describes the optional name of the plain http backend of a ssl passthrough server.

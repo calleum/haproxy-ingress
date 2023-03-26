@@ -21,7 +21,7 @@ import (
 
 	"github.com/golang/glog"
 
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 )
@@ -70,7 +70,7 @@ type CookieConfig struct {
 
 // CookieAffinityParse gets the annotation values related to Cookie Affinity
 // It also sets default values when no value or incorrect value is found
-func CookieAffinityParse(ing *extensions.Ingress) *CookieConfig {
+func CookieAffinityParse(ing *networking.Ingress) *CookieConfig {
 
 	sn, err := parser.GetStringAnnotation(annotationAffinityCookieName, ing)
 
@@ -122,7 +122,7 @@ type affinity struct {
 
 // ParseAnnotations parses the annotations contained in the ingress
 // rule used to configure the affinity directives
-func (a affinity) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a affinity) Parse(ing *networking.Ingress) (interface{}, error) {
 	cookieAffinityConfig := &CookieConfig{Dynamic: defaultAffinityCookieDynamic}
 	// Check the type of affinity that will be used
 	at, err := parser.GetStringAnnotation(annotationAffinityType, ing)

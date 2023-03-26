@@ -23,7 +23,7 @@ import (
 	"sort"
 	"strings"
 
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/resolver"
@@ -163,7 +163,7 @@ func NewParser(br resolver.DefaultBackend) parser.IngressAnnotation {
 
 // ParseAnnotations parses the annotations contained in the ingress
 // rule used to rewrite the defined paths
-func (a ratelimit) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a ratelimit) Parse(ing *networking.Ingress) (interface{}, error) {
 	defBackend := a.backendResolver.GetDefaultBackend()
 	lr, err := parser.GetIntAnnotation(limitRATE, ing)
 	if err != nil {

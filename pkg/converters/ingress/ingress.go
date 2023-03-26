@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	api "k8s.io/api/core/v1"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/converters/ingress/annotations"
 	ingtypes "github.com/jcmoraisjr/haproxy-ingress/pkg/converters/ingress/types"
@@ -35,7 +35,7 @@ import (
 
 // Config ...
 type Config interface {
-	Sync(ingress []*extensions.Ingress)
+	Sync(ingress []*networking.Ingress)
 }
 
 // NewIngressConverter ...
@@ -81,7 +81,7 @@ type converter struct {
 	backendAnnotations map[*hatypes.Backend]*annotations.Mapper
 }
 
-func (c *converter) Sync(ingress []*extensions.Ingress) {
+func (c *converter) Sync(ingress []*networking.Ingress) {
 	c.syncDefaultCrt()
 	for _, ing := range ingress {
 		c.syncIngress(ing)
@@ -103,7 +103,7 @@ func (c *converter) syncDefaultCrt() {
 	c.defaultCrt = crt
 }
 
-func (c *converter) syncIngress(ing *extensions.Ingress) {
+func (c *converter) syncIngress(ing *networking.Ingress) {
 	fullIngName := fmt.Sprintf("%s/%s", ing.Namespace, ing.Name)
 	source := &annotations.Source{
 		Namespace: ing.Namespace,
@@ -349,7 +349,7 @@ func (c *converter) readAnnotations(annotations map[string]string) (annHost, ann
 	return annHost, annBack
 }
 
-func readServiceNamePort(backend *extensions.IngressBackend) (string, string, error) {
+func readServiceNamePort(backend *networking.IngressBackend) (string, string, error) {
     if backend.Service == nil {
 		return "", "", fmt.Errorf("resource backend is not supported yet")
 	}

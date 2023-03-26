@@ -18,7 +18,7 @@ package snippet
 
 import (
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	"strings"
 )
 
@@ -45,7 +45,7 @@ func NewParser() parser.IngressAnnotation {
 // Parse parses the annotations contained in the ingress rule
 // used to indicate if the frontend and/or the backend contains
 // a fragment of configuration to be included
-func (a snippet) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a snippet) Parse(ing *networking.Ingress) (interface{}, error) {
 	f, _ := parser.GetStringAnnotation(configFrontendAnn, ing)
 	b, _ := parser.GetStringAnnotation(configBackendAnn, ing)
 	config := Config{

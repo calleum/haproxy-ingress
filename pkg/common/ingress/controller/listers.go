@@ -23,7 +23,7 @@ import (
 	"github.com/golang/glog"
 
 	apiv1 "k8s.io/api/core/v1"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/cache"
@@ -73,7 +73,7 @@ func (ic *GenericController) createListers(disableNodeLister bool) (*ingress.Sto
 	// This is used to detect new content, updates or removals and act accordingly
 	ingEventHandler := cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			addIng := obj.(*extensions.Ingress)
+			addIng := obj.(*networking.Ingress)
 			if !class.IsValid(addIng, ic.cfg.IngressClass, ic.cfg.DefaultIngressClass) {
 				a, _ := parser.GetStringAnnotation(class.IngressKey, addIng)
 				glog.Infof("ignoring add for ingress %v based on annotation %v with value %v", addIng.Name, class.IngressKey, a)
@@ -83,7 +83,7 @@ func (ic *GenericController) createListers(disableNodeLister bool) (*ingress.Sto
 			ic.syncQueue.Enqueue(obj)
 		},
 		DeleteFunc: func(obj interface{}) {
-			delIng, ok := obj.(*extensions.Ingress)
+			delIng, ok := obj.(*networking.Ingress)
 			if !ok {
 				// If we reached here it means the ingress was deleted but its final state is unrecorded.
 				tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
@@ -91,7 +91,7 @@ func (ic *GenericController) createListers(disableNodeLister bool) (*ingress.Sto
 					glog.Errorf("couldn't get object from tombstone %#v", obj)
 					return
 				}
-				delIng, ok = tombstone.Obj.(*extensions.Ingress)
+				delIng, ok = tombstone.Obj.(*networking.Ingress)
 				if !ok {
 					glog.Errorf("Tombstone contained object that is not an Ingress: %#v", obj)
 					return
@@ -105,8 +105,8 @@ func (ic *GenericController) createListers(disableNodeLister bool) (*ingress.Sto
 			ic.syncQueue.Enqueue(obj)
 		},
 		UpdateFunc: func(old, cur interface{}) {
-			oldIng := old.(*extensions.Ingress)
-			curIng := cur.(*extensions.Ingress)
+			oldIng := old.(*networking.Ingress)
+			curIng := cur.(*networking.Ingress)
 			validOld := class.IsValid(oldIng, ic.cfg.IngressClass, ic.cfg.DefaultIngressClass)
 			validCur := class.IsValid(curIng, ic.cfg.IngressClass, ic.cfg.DefaultIngressClass)
 			if !validOld && validCur {
@@ -237,7 +237,7 @@ func (ic *GenericController) createListers(disableNodeLister bool) (*ingress.Sto
 
 	lister.Ingress.Store, controller.Ingress = cache.NewInformer(
 		cache.NewListWatchFromClient(ic.cfg.Client.ExtensionsV1beta1().RESTClient(), "ingresses", ic.cfg.Namespace, fields.Everything()),
-		&extensions.Ingress{}, ic.cfg.ResyncPeriod, ingEventHandler)
+		&networking.Ingress{}, ic.cfg.ResyncPeriod, ingEventHandler)
 
 	lister.Endpoint.Store, controller.Endpoint = cache.NewInformer(
 		cache.NewListWatchFromClient(ic.cfg.Client.CoreV1().RESTClient(), "endpoints", watchNs, fields.Everything()),

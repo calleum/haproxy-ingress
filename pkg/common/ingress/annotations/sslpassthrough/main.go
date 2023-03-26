@@ -18,7 +18,7 @@ package sslpassthrough
 
 import (
 	"github.com/golang/glog"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	ing_errors "github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/errors"
@@ -44,7 +44,7 @@ func NewParser() parser.IngressAnnotation {
 
 // ParseAnnotations parses the annotations contained in the ingress
 // rule used to indicate if is required to configure
-func (a sslpt) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a sslpt) Parse(ing *networking.Ingress) (interface{}, error) {
 	if ing.GetAnnotations() == nil {
 		return &Config{}, ing_errors.ErrMissingAnnotations
 	}

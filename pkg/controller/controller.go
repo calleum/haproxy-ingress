@@ -28,7 +28,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/spf13/pflag"
 	api "k8s.io/api/core/v1"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/class"
@@ -206,7 +206,7 @@ func (hc *HAProxyController) SetListers(lister *ingress.StoreLister) {
 
 // UpdateIngressStatus custom callback used to update the status in an Ingress rule
 // If the function returns nil the standard functions will be executed.
-func (hc *HAProxyController) UpdateIngressStatus(*extensions.Ingress) []api.LoadBalancerIngress {
+func (hc *HAProxyController) UpdateIngressStatus(*networking.Ingress) []api.LoadBalancerIngress {
 	return nil
 }
 
@@ -280,9 +280,9 @@ func (hc *HAProxyController) SyncIngress(item interface{}) error {
 	hc.updateCount++
 	hc.logger.Info("Starting HAProxy update id=%d", hc.updateCount)
 	timer := utils.NewTimer()
-	var ingress []*extensions.Ingress
+	var ingress []*networking.Ingress
 	for _, iing := range hc.storeLister.Ingress.List() {
-		ing := iing.(*extensions.Ingress)
+		ing := iing.(*networking.Ingress)
 		if class.IsValid(ing, hc.cfg.IngressClass, hc.cfg.DefaultIngressClass) {
 			ingress = append(ingress, ing)
 		}

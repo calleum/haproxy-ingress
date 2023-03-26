@@ -19,7 +19,7 @@ package slotsincrement
 import (
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/resolver"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 )
 
 const (
@@ -36,7 +36,7 @@ func NewParser(resolver resolver.DefaultBackend) parser.IngressAnnotation {
 }
 
 // Parse parses slots-increment annotation
-func (s slotsInc) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (s slotsInc) Parse(ing *networking.Ingress) (interface{}, error) {
 	increment, _ := parser.GetIntAnnotation(slotsIncrementAnn, ing)
 	if increment <= 0 {
 		increment = s.resolver.GetDefaultBackend().BackendServerSlotsIncrement

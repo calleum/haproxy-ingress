@@ -21,7 +21,7 @@ import (
 	"regexp"
 	"strings"
 
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	ing_errors "github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/errors"
@@ -117,7 +117,7 @@ func NewParser() parser.IngressAnnotation {
 
 // ParseAnnotations parses the annotations contained in the ingress
 // rule used to use an external URL as source for authentication
-func (a authReq) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a authReq) Parse(ing *networking.Ingress) (interface{}, error) {
 	str, err := parser.GetStringAnnotation(authURL, ing)
 	if err != nil {
 		return nil, err

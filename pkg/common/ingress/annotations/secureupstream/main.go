@@ -18,7 +18,7 @@ package secureupstream
 
 import (
 	"github.com/pkg/errors"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/resolver"
@@ -52,7 +52,7 @@ func NewParser(cfg resolver.Configuration, crt resolver.AuthCertificate) parser.
 
 // Parse parses the annotations contained in the ingress
 // rule used to indicate if the upstream servers should use SSL
-func (a su) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a su) Parse(ing *networking.Ingress) (interface{}, error) {
 	s, _ := parser.GetBoolAnnotation(secureUpstream, ing)
 	crt, _ := parser.GetStringAnnotation(secureCrtSecret, ing)
 	CA, _ := parser.GetStringAnnotation(secureVerifyCASecret, ing)

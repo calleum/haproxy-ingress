@@ -18,7 +18,7 @@ package authtls
 
 import (
 	"github.com/pkg/errors"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	ing_errors "github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/errors"
@@ -89,7 +89,7 @@ type authTLS struct {
 
 // Parse parses the annotations contained in the ingress
 // rule used to use a Certificate as authentication method
-func (a authTLS) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a authTLS) Parse(ing *networking.Ingress) (interface{}, error) {
 
 	tlsauthsecret, err := parser.GetStringAnnotation(annotationAuthTLSSecret, ing)
 	if err != nil {

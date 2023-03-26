@@ -18,7 +18,7 @@ package class
 
 import (
 	"github.com/golang/glog"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/errors"
@@ -34,7 +34,7 @@ const (
 // IsValid returns true if the given Ingress either doesn't specify
 // the ingress.class annotation, or it's set to the configured in the
 // ingress controller.
-func IsValid(ing *extensions.Ingress, controller, defClass string) bool {
+func IsValid(ing *networking.Ingress, controller, defClass string) bool {
 	ingress, err := parser.GetStringAnnotation(IngressKey, ing)
 	if err != nil && !errors.IsMissingAnnotations(err) {
 		glog.Warningf("unexpected error reading ingress annotation: %v", err)

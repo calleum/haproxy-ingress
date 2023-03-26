@@ -17,7 +17,7 @@ limitations under the License.
 package portinredirect
 
 import (
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/resolver"
@@ -38,7 +38,7 @@ func NewParser(db resolver.DefaultBackend) parser.IngressAnnotation {
 
 // Parse parses the annotations contained in the ingress
 // rule used to indicate if the redirects must
-func (a portInRedirect) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a portInRedirect) Parse(ing *networking.Ingress) (interface{}, error) {
 	up, err := parser.GetBoolAnnotation(annotation, ing)
 	if err != nil {
 		return a.backendResolver.GetDefaultBackend().UsePortInRedirects, nil

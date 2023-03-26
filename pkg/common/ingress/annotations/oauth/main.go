@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	"regexp"
 	"strings"
 )
@@ -52,7 +52,7 @@ func NewParser() parser.IngressAnnotation {
 }
 
 // Parse parses oauth annotations and create a Config struct
-func (a oauth) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a oauth) Parse(ing *networking.Ingress) (interface{}, error) {
 	var uriPrefix string
 	var headers []string
 	oauthImpl, _ := parser.GetStringAnnotation(oauthAnn, ing)
@@ -100,7 +100,7 @@ func (a oauth) Parse(ing *extensions.Ingress) (interface{}, error) {
 	}, nil
 }
 
-func findBackend(p string, ing *extensions.Ingress) *extensions.IngressBackend {
+func findBackend(p string, ing *networking.Ingress) *networking.IngressBackend {
 	for _, rule := range ing.Spec.Rules {
 		for _, path := range rule.HTTP.Paths {
 			if p == strings.TrimRight(path.Path, "/") {

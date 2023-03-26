@@ -18,7 +18,7 @@ package proxy
 
 import (
 	"github.com/golang/glog"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	"regexp"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
@@ -110,7 +110,7 @@ func NewParser(br resolver.DefaultBackend) parser.IngressAnnotation {
 
 // ParseAnnotations parses the annotations contained in the ingress
 // rule used to configure upstream check parameters
-func (a proxy) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a proxy) Parse(ing *networking.Ingress) (interface{}, error) {
 	defBackend := a.backendResolver.GetDefaultBackend()
 	ct, err := parser.GetIntAnnotation(connect, ing)
 	if err != nil {

@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	"regexp"
 	"strconv"
 	"strings"
@@ -60,7 +60,7 @@ func NewParser() parser.IngressAnnotation {
 }
 
 // Parse parses blue/green annotation and create a Config struct
-func (bg bgdeploy) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (bg bgdeploy) Parse(ing *networking.Ingress) (interface{}, error) {
 	s, err := parser.GetStringAnnotation(blueGreenBalanceAnn, ing)
 	if err != nil {
 		s, _ = parser.GetStringAnnotation(blueGreenDeployAnn, ing)

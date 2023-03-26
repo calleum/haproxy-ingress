@@ -19,7 +19,7 @@ package hsts
 import (
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/resolver"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 )
 
 const (
@@ -74,7 +74,7 @@ func NewParser(cfg resolver.DefaultBackend) parser.IngressAnnotation {
 
 // Parse parses the annotations contained in the ingress
 // rule used to configure HSTS per server and location
-func (hsts *hsts) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (hsts *hsts) Parse(ing *networking.Ingress) (interface{}, error) {
 	defaultBackend := hsts.cfg.GetDefaultBackend()
 
 	enable, err := parser.GetBoolAnnotation(annHSTS, ing)

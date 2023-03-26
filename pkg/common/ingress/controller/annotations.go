@@ -55,7 +55,7 @@ import (
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/waf"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/errors"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/resolver"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 )
 
 type extractorConfig interface {
@@ -112,7 +112,7 @@ func newAnnotationExtractor(cfg extractorConfig) annotationExtractor {
 	}
 }
 
-func (e *annotationExtractor) Extract(ing *extensions.Ingress) map[string]interface{} {
+func (e *annotationExtractor) Extract(ing *networking.Ingress) map[string]interface{} {
 	anns := make(map[string]interface{})
 	for name, annotationParser := range e.annotations {
 		val, err := annotationParser.Parse(ing)
@@ -167,17 +167,17 @@ const (
 	agentCheck           = "AgentCheck"
 )
 
-func (e *annotationExtractor) BalanceAlgorithm(ing *extensions.Ingress) string {
+func (e *annotationExtractor) BalanceAlgorithm(ing *networking.Ingress) string {
 	val, _ := e.annotations[balanceAlgorithm].Parse(ing)
 	return val.(string)
 }
 
-func (e *annotationExtractor) ServiceUpstream(ing *extensions.Ingress) bool {
+func (e *annotationExtractor) ServiceUpstream(ing *networking.Ingress) bool {
 	val, _ := e.annotations[serviceUpstream].Parse(ing)
 	return val.(bool)
 }
 
-func (e *annotationExtractor) SecureUpstream(ing *extensions.Ingress) *secureupstream.Secure {
+func (e *annotationExtractor) SecureUpstream(ing *networking.Ingress) *secureupstream.Secure {
 	val, err := e.annotations[secureUpstream].Parse(ing)
 	if err != nil {
 		glog.Errorf("error parsing secure upstream: %v", err)
@@ -186,22 +186,22 @@ func (e *annotationExtractor) SecureUpstream(ing *extensions.Ingress) *secureups
 	return secure
 }
 
-func (e *annotationExtractor) SlotsIncrement(ing *extensions.Ingress) int {
+func (e *annotationExtractor) SlotsIncrement(ing *networking.Ingress) int {
 	val, _ := e.annotations[slotsIncrement].Parse(ing)
 	return val.(int)
 }
 
-func (e *annotationExtractor) Connection(ing *extensions.Ingress) *connection.Config {
+func (e *annotationExtractor) Connection(ing *networking.Ingress) *connection.Config {
 	val, _ := e.annotations[conn].Parse(ing)
 	return val.(*connection.Config)
 }
 
-func (e *annotationExtractor) HealthCheck(ing *extensions.Ingress) *healthcheck.Config {
+func (e *annotationExtractor) HealthCheck(ing *networking.Ingress) *healthcheck.Config {
 	val, _ := e.annotations[healthCheck].Parse(ing)
 	return val.(*healthcheck.Config)
 }
 
-func (e *annotationExtractor) BlueGreen(ing *extensions.Ingress) *bluegreen.Config {
+func (e *annotationExtractor) BlueGreen(ing *networking.Ingress) *bluegreen.Config {
 	val, err := e.annotations[blueGreen].Parse(ing)
 	if err != nil {
 		return &bluegreen.Config{
@@ -211,7 +211,7 @@ func (e *annotationExtractor) BlueGreen(ing *extensions.Ingress) *bluegreen.Conf
 	return val.(*bluegreen.Config)
 }
 
-func (e *annotationExtractor) ProxyBackend(ing *extensions.Ingress) *proxybackend.Config {
+func (e *annotationExtractor) ProxyBackend(ing *networking.Ingress) *proxybackend.Config {
 	val, err := e.annotations[proxyBackend].Parse(ing)
 	if err != nil {
 		return &proxybackend.Config{}
@@ -219,37 +219,37 @@ func (e *annotationExtractor) ProxyBackend(ing *extensions.Ingress) *proxybacken
 	return val.(*proxybackend.Config)
 }
 
-func (e *annotationExtractor) SSLPassthrough(ing *extensions.Ingress) *sslpassthrough.Config {
+func (e *annotationExtractor) SSLPassthrough(ing *networking.Ingress) *sslpassthrough.Config {
 	val, _ := e.annotations[sslPassthrough].Parse(ing)
 	return val.(*sslpassthrough.Config)
 }
 
-func (e *annotationExtractor) ConfigurationSnippet(ing *extensions.Ingress) snippet.Config {
+func (e *annotationExtractor) ConfigurationSnippet(ing *networking.Ingress) snippet.Config {
 	val, _ := e.annotations[configSnippet].Parse(ing)
 	return val.(snippet.Config)
 }
 
-func (e *annotationExtractor) Alias(ing *extensions.Ingress) *alias.Config {
+func (e *annotationExtractor) Alias(ing *networking.Ingress) *alias.Config {
 	val, _ := e.annotations[serverAlias].Parse(ing)
 	return val.(*alias.Config)
 }
 
-func (e *annotationExtractor) ClientBodyBufferSize(ing *extensions.Ingress) string {
+func (e *annotationExtractor) ClientBodyBufferSize(ing *networking.Ingress) string {
 	val, _ := e.annotations[clientBodyBufferSize].Parse(ing)
 	return val.(string)
 }
 
-func (e *annotationExtractor) SessionAffinity(ing *extensions.Ingress) *sessionaffinity.AffinityConfig {
+func (e *annotationExtractor) SessionAffinity(ing *networking.Ingress) *sessionaffinity.AffinityConfig {
 	val, _ := e.annotations[sessionAffinity].Parse(ing)
 	return val.(*sessionaffinity.AffinityConfig)
 }
 
-func (e *annotationExtractor) Cors(ing *extensions.Ingress) *cors.CorsConfig {
+func (e *annotationExtractor) Cors(ing *networking.Ingress) *cors.CorsConfig {
 	val, _ := e.annotations[corsConfig].Parse(ing)
 	return val.(*cors.CorsConfig)
 }
 
-func (e *annotationExtractor) CertificateAuth(ing *extensions.Ingress) *authtls.AuthSSLConfig {
+func (e *annotationExtractor) CertificateAuth(ing *networking.Ingress) *authtls.AuthSSLConfig {
 	val, err := e.annotations[certificateAuth].Parse(ing)
 	if errors.IsMissingAnnotations(err) {
 		return nil
@@ -262,22 +262,22 @@ func (e *annotationExtractor) CertificateAuth(ing *extensions.Ingress) *authtls.
 	return secure
 }
 
-func (e *annotationExtractor) ServerSnippet(ing *extensions.Ingress) string {
+func (e *annotationExtractor) ServerSnippet(ing *networking.Ingress) string {
 	val, _ := e.annotations[serverSnippet].Parse(ing)
 	return val.(string)
 }
 
-func (e *annotationExtractor) UpstreamHashBy(ing *extensions.Ingress) string {
+func (e *annotationExtractor) UpstreamHashBy(ing *networking.Ingress) string {
 	val, _ := e.annotations[upstreamHashBy].Parse(ing)
 	return val.(string)
 }
 
-func (e *annotationExtractor) UseResolver(ing *extensions.Ingress) string {
+func (e *annotationExtractor) UseResolver(ing *networking.Ingress) string {
 	val, _ := e.annotations[useResolver].Parse(ing)
 	return val.(string)
 }
 
-func (e *annotationExtractor) AgentCheck(ing *extensions.Ingress) *agentcheck.Config {
+func (e *annotationExtractor) AgentCheck(ing *networking.Ingress) *agentcheck.Config {
 	val, _ := e.annotations[agentCheck].Parse(ing)
 	return val.(*agentcheck.Config)
 }

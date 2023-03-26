@@ -18,7 +18,7 @@ package serviceupstream
 
 import (
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 )
 
 const (
@@ -33,6 +33,6 @@ func NewParser() parser.IngressAnnotation {
 	return serviceUpstream{}
 }
 
-func (s serviceUpstream) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (s serviceUpstream) Parse(ing *networking.Ingress) (interface{}, error) {
 	return parser.GetBoolAnnotation(annotationServiceUpstream, ing)
 }

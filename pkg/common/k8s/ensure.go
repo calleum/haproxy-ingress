@@ -20,7 +20,7 @@ import (
     "context"
 	api "k8s.io/api/core/v1"
 	core "k8s.io/api/core/v1"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -38,7 +38,7 @@ func EnsureSecret(cl kubernetes.Interface, secret *api.Secret) (*api.Secret, err
 	return s, nil
 }
 
-func EnsureIngress(cl kubernetes.Interface, ingress *extensions.Ingress) (*extensions.Ingress, error) {
+func EnsureIngress(cl kubernetes.Interface, ingress *networking.Ingress) (*networking.Ingress, error) {
     ctx := context.Background()
 	s, err := cl.NetworkingV1().Ingresses(ingress.Namespace).Update(ctx, ingress, metav1.UpdateOptions{})
 	if err != nil {

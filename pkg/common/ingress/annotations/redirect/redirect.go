@@ -21,7 +21,7 @@ import (
 	"net/url"
 	"strings"
 
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/errors"
@@ -51,7 +51,7 @@ func NewParser() parser.IngressAnnotation {
 // rule used to create a redirect in the paths defined in the rule.
 // If the Ingress containes both annotations the execution order is
 // temporal and then permanent
-func (a redirect) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a redirect) Parse(ing *networking.Ingress) (interface{}, error) {
 	r3w, _ := parser.GetBoolAnnotation(www, ing)
 
 	tr, err := parser.GetStringAnnotation(temporal, ing)

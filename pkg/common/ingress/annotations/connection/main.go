@@ -19,7 +19,7 @@ package connection
 import (
 	"github.com/golang/glog"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	"regexp"
 )
 
@@ -49,7 +49,7 @@ func NewParser() parser.IngressAnnotation {
 }
 
 // Parse parses connection limits and timeouts annotations and creates a Config struct
-func (c conn) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (c conn) Parse(ing *networking.Ingress) (interface{}, error) {
 	maxconn, err := parser.GetIntAnnotation(maxconnServerAnn, ing)
 	if err != nil {
 		maxconn = 0

@@ -24,7 +24,7 @@ import (
 	"github.com/golang/glog"
 
 	apiv1 "k8s.io/api/core/v1"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress"
@@ -50,7 +50,7 @@ func (ic *GenericController) syncSecret(key string) {
 	cert, err := ic.getPemCertificate(secret)
 	if err != nil {
 		glog.V(3).Infof("syncing a non ca/crt secret %v", key)
-		ic.syncQueue.Enqueue(&extensions.Ingress{})
+		ic.syncQueue.Enqueue(&networking.Ingress{})
 		return
 	}
 
@@ -66,7 +66,7 @@ func (ic *GenericController) syncSecret(key string) {
 		ic.sslCertTracker.Update(key, cert)
 		// this update must trigger an update
 		// (like an update event from a change in Ingress)
-		ic.syncQueue.Enqueue(&extensions.Ingress{})
+		ic.syncQueue.Enqueue(&networking.Ingress{})
 		return
 	}
 
@@ -74,7 +74,7 @@ func (ic *GenericController) syncSecret(key string) {
 	ic.sslCertTracker.Add(key, cert)
 	// this update must trigger an update
 	// (like an update event from a change in Ingress)
-	ic.syncQueue.Enqueue(&extensions.Ingress{})
+	ic.syncQueue.Enqueue(&networking.Ingress{})
 }
 
 // getPemCertificate receives a secret, and creates a ingress.SSLCert as return.
@@ -137,7 +137,7 @@ func (ic *GenericController) getPemCertificate(secret *apiv1.Secret) (*ingress.S
 // In this case we call syncSecret.
 func (ic *GenericController) checkMissingSecrets() {
 	for _, obj := range ic.listers.Ingress.List() {
-		ing := obj.(*extensions.Ingress)
+		ing := obj.(*networking.Ingress)
 
 		if !class.IsValid(ing, ic.cfg.IngressClass, ic.cfg.DefaultIngressClass) {
 			continue

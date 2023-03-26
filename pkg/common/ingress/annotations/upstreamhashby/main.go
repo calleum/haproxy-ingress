@@ -17,7 +17,7 @@ limitations under the License.
 package upstreamhashby
 
 import (
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 )
@@ -37,6 +37,6 @@ func NewParser() parser.IngressAnnotation {
 // Parse parses the annotations contained in the ingress rule
 // used to indicate if the location/s contains a fragment of
 // configuration to be included inside the paths of the rules
-func (a upstreamhashby) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a upstreamhashby) Parse(ing *networking.Ingress) (interface{}, error) {
 	return parser.GetStringAnnotation(annotation, ing)
 }

@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	api "k8s.io/api/core/v1"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/defaults"
@@ -30,30 +30,30 @@ const (
 	defRoute = "/demo"
 )
 
-func buildIngress() *extensions.Ingress {
-    svc := extensions.IngressServiceBackend{
+func buildIngress() *networking.Ingress {
+    svc := networking.IngressServiceBackend{
     	Name: "default-backend",
-    	Port: extensions.ServiceBackendPort{Number: 80},
+    	Port: networking.ServiceBackendPort{Number: 80},
     }
-	defaultBackend := extensions.IngressBackend{
+	defaultBackend := networking.IngressBackend{
         Service: &svc,
 	}
 
-	return &extensions.Ingress{
+	return &networking.Ingress{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "foo",
 			Namespace: api.NamespaceDefault,
 		},
-		Spec: extensions.IngressSpec{
-			DefaultBackend: &extensions.IngressBackend{
+		Spec: networking.IngressSpec{
+			DefaultBackend: &networking.IngressBackend{
                 Service: &svc,
 			},
-			Rules: []extensions.IngressRule{
+			Rules: []networking.IngressRule{
 				{
 					Host: "foo.bar.com",
-					IngressRuleValue: extensions.IngressRuleValue{
-						HTTP: &extensions.HTTPIngressRuleValue{
-							Paths: []extensions.HTTPIngressPath{
+					IngressRuleValue: networking.IngressRuleValue{
+						HTTP: &networking.HTTPIngressRuleValue{
+							Paths: []networking.HTTPIngressPath{
 								{
 									Path:    "/foo",
 									Backend: defaultBackend,

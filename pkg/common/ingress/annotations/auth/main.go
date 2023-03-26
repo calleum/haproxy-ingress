@@ -26,7 +26,7 @@ import (
 
 	"github.com/pkg/errors"
 	api "k8s.io/api/core/v1"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/file"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
@@ -110,7 +110,7 @@ func NewParser(authDirectory string, cfg resolver.Configuration, sr resolver.Sec
 // rule used to add authentication in the paths defined in the rule
 // and generated an htpasswd compatible file to be used as source
 // during the authentication process
-func (a auth) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a auth) Parse(ing *networking.Ingress) (interface{}, error) {
 	at, err := parser.GetStringAnnotation(authType, ing)
 	if err != nil {
 		return nil, err

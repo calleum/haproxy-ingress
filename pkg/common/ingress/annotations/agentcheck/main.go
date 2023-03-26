@@ -19,7 +19,7 @@ package agentcheck
 import (
 	"strconv"
 
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/golang/glog"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
@@ -68,7 +68,7 @@ type agentCheck struct {
 
 // ParseAnnotations parses the annotations contained in the ingress
 // rule used to configure agent check parameters
-func (a agentCheck) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a agentCheck) Parse(ing *networking.Ingress) (interface{}, error) {
 	addr, err := parser.GetStringAnnotation(agentCheckAddr, ing)
 	if err != nil {
 		if err == errors.ErrMissingAnnotations {

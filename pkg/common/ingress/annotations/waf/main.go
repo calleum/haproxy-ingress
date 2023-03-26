@@ -19,7 +19,7 @@ package waf
 import (
 	"github.com/golang/glog"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	"regexp"
 )
 
@@ -44,7 +44,7 @@ func NewParser() parser.IngressAnnotation {
 }
 
 // Parse parses waf annotation
-func (w waf) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (w waf) Parse(ing *networking.Ingress) (interface{}, error) {
 	s, err := parser.GetStringAnnotation(wafAnn, ing)
 	if err != nil {
 		return Config{}, nil

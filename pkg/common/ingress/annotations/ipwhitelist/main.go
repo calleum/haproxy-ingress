@@ -24,7 +24,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/net"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	ing_errors "github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/errors"
@@ -82,7 +82,7 @@ func NewParser(br resolver.DefaultBackend) parser.IngressAnnotation {
 // rule used to limit access to certain client addresses or networks.
 // Multiple ranges can specified using commas as separator
 // e.g. `18.0.0.0/8,56.0.0.0/8`
-func (a ipwhitelist) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a ipwhitelist) Parse(ing *networking.Ingress) (interface{}, error) {
 	defBackend := a.backendResolver.GetDefaultBackend()
 	sort.Strings(defBackend.WhitelistSourceRange)
 

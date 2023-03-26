@@ -30,7 +30,7 @@ import (
 
 	pool "gopkg.in/go-playground/pool.v3"
 	apiv1 "k8s.io/api/core/v1"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -75,7 +75,7 @@ type Config struct {
 	IngressClass        string
 
 	// CustomIngressStatus allows to set custom values in Ingress status
-	CustomIngressStatus func(*extensions.Ingress) []apiv1.LoadBalancerIngress
+	CustomIngressStatus func(*networking.Ingress) []apiv1.LoadBalancerIngress
 }
 
 // statusSync keeps the status IP in each Ingress rule updated executing a periodic check
@@ -322,7 +322,7 @@ func (s *statusSync) updateStatus(newIngressPoint []apiv1.LoadBalancerIngress) {
 	batch := p.Batch()
 
 	for _, cur := range ings {
-		ing := cur.(*extensions.Ingress)
+		ing := cur.(*networking.Ingress)
 
 		if !class.IsValid(ing, s.Config.IngressClass, s.Config.DefaultIngressClass) {
 			continue
@@ -335,9 +335,9 @@ func (s *statusSync) updateStatus(newIngressPoint []apiv1.LoadBalancerIngress) {
 	batch.WaitAll()
 }
 
-func runUpdate(ing *extensions.Ingress, status []apiv1.LoadBalancerIngress,
+func runUpdate(ing *networking.Ingress, status []apiv1.LoadBalancerIngress,
 	client clientset.Interface,
-	statusFunc func(*extensions.Ingress) []apiv1.LoadBalancerIngress) pool.WorkFunc {
+	statusFunc func(*networking.Ingress) []apiv1.LoadBalancerIngress) pool.WorkFunc {
     ctx := context.Background()
 	return func(wu pool.WorkUnit) (interface{}, error) {
 		if wu.IsCancelled() {

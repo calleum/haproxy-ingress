@@ -20,7 +20,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/resolver"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 	"regexp"
 )
 
@@ -42,7 +42,7 @@ func NewParser(resolver resolver.DefaultBackend) parser.IngressAnnotation {
 }
 
 // Parse parses balance-algorithm annotation
-func (b balance) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (b balance) Parse(ing *networking.Ingress) (interface{}, error) {
 	s, err := parser.GetStringAnnotation(balanceAnn, ing)
 	def := b.resolver.GetDefaultBackend().BalanceAlgorithm
 	if err != nil {

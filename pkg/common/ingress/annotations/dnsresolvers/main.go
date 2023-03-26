@@ -19,7 +19,7 @@ package dnsresolvers
 import (
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/resolver"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 )
 
 const (
@@ -42,7 +42,7 @@ func NewParser(resolvers resolver.DefaultBackend) parser.IngressAnnotation {
 }
 
 // Parse parses dns-resolvers annotation
-func (b dnsresolvers) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (b dnsresolvers) Parse(ing *networking.Ingress) (interface{}, error) {
 	useResolver, _ := parser.GetStringAnnotation(useResolverAnn, ing)
 	return useResolver, nil
 }

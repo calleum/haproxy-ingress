@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/resolver"
@@ -41,7 +41,7 @@ func NewParser(sr resolver.Service) parser.IngressAnnotation {
 
 // Parse parses the annotations contained in the ingress to use
 // a custom default backend
-func (db backend) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (db backend) Parse(ing *networking.Ingress) (interface{}, error) {
 	s, err := parser.GetStringAnnotation(defaultBackend, ing)
 	if err != nil {
 		return nil, err

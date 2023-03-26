@@ -17,7 +17,7 @@ limitations under the License.
 package alias
 
 import (
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
 )
@@ -43,7 +43,7 @@ func NewParser() parser.IngressAnnotation {
 
 // Parse parses the annotations contained in the ingress rule
 // used to add an alias to the provided hosts
-func (a alias) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a alias) Parse(ing *networking.Ingress) (interface{}, error) {
 	host, _ := parser.GetStringAnnotation(aliasAnn, ing)
 	regex, _ := parser.GetStringAnnotation(aliasRegexAnn, ing)
 	return &Config{

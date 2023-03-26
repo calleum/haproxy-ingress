@@ -19,7 +19,7 @@ package healthcheck
 import (
 	"strconv"
 
-	extensions "k8s.io/api/networking/v1"
+	networking "k8s.io/api/networking/v1"
 
 	"github.com/golang/glog"
 	"github.com/jcmoraisjr/haproxy-ingress/pkg/common/ingress/annotations/parser"
@@ -78,7 +78,7 @@ type healthCheck struct {
 
 // ParseAnnotations parses the annotations contained in the ingress
 // rule used to configure health check parameters
-func (a healthCheck) Parse(ing *extensions.Ingress) (interface{}, error) {
+func (a healthCheck) Parse(ing *networking.Ingress) (interface{}, error) {
 	uri, _ := parser.GetStringAnnotation(healthCheckURI, ing)
 
 	addr, err := parser.GetStringAnnotation(healthCheckAddr, ing)

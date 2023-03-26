@@ -17,6 +17,7 @@ limitations under the License.
 package ingress
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 
@@ -1205,11 +1206,22 @@ func (c *testConfig) createSvc1Ann(name, port, endpoints string, ann map[string]
 }
 
 func (c *testConfig) createSvc1(name, port, endpoints string) (*api.Service, *api.Endpoints) {
-	svc, ep := conv_helper.CreateService(name, port, endpoints)
-	c.cache.SvcList = append(c.cache.SvcList, svc)
+    	svc, ep := conv_helper.CreateService(name, port, endpoints)
+	// TODO change SvcList to map
+	var has bool
+	for i, svc1 := range c.cache.SvcList {
+		if svc1.Namespace+"/"+svc1.Name == name {
+			c.cache.SvcList[i] = svc
+			has = true
+			break
+		}
+	}
+	if !has {
+		c.cache.SvcList = append(c.cache.SvcList, svc)
+	}
 	c.cache.EpList[name] = ep
 	return svc, ep
-}
+}	
 
 func (c *testConfig) createPod1(name, ip, port string) *api.Pod {
 	pname := strings.Split(name, "/")
@@ -1236,10 +1248,22 @@ func (c *testConfig) createSecretTLS1(secretName string) {
 	c.cache.SecretTLSPath[secretName] = "/tls/" + secretName + ".pem"
 }
 
+func createServicePort(port string) extensions.ServiceBackendPort {
+	portNumber, err := strconv.Atoi(port)
+	if err == nil {
+		return extensions.ServiceBackendPort{
+			Number: int32(portNumber),
+		}
+	}
+	return extensions.ServiceBackendPort{
+		Name: port,
+	}
+}
+
 func (c *testConfig) createIng1(name, hostname, path, service string) *extensions.Ingress {
 	sname := strings.Split(name, "/")
 	sservice := strings.Split(service, ":")
-	return c.createObject(`
+    ing := c.createObject(`
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -1253,9 +1277,9 @@ spec:
       - path: ` + path + `
         backend:
           service:
-            name: ` + sservice[0] + `
-            port:
-              number: ` + sservice[1]).(*extensions.Ingress)
+            name: ` + sservice[0]).(*extensions.Ingress)
+	ing.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Port = createServicePort(sservice[1])
+    return ing
 }
 
 func (c *testConfig) createIng1Ann(name, hostname, path, service string, ann map[string]string) *extensions.Ingress {
@@ -1267,16 +1291,19 @@ func (c *testConfig) createIng1Ann(name, hostname, path, service string, ann map
 func (c *testConfig) createIng2(name, service string) *extensions.Ingress {
 	sname := strings.Split(name, "/")
 	sservice := strings.Split(service, ":")
-	return c.createObject(`
+    ing := c.createObject(`
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ` + sname[1] + `
   namespace: ` + sname[0] + `
 spec:
-  backend:
-    serviceName: ` + sservice[0] + `
-    servicePort: ` + sservice[1]).(*extensions.Ingress)
+  defaultBackend:
+    service:
+        name: ` + sservice[0]).(*extensions.Ingress)
+    ing.Spec.DefaultBackend.Service.Port = createServicePort(sservice[1])
+
+    return ing
 }
 
 func (c *testConfig) createIng2Ann(name, service string, ann map[string]string) *extensions.Ingress {

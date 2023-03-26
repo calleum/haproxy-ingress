@@ -112,8 +112,11 @@ func (c *converter) syncIngress(ing *extensions.Ingress) {
 	}
 	annHost, annBack := c.readAnnotations(ing.Annotations)
 	if ing.Spec.DefaultBackend != nil {
-		svcName, svcPort := readServiceNamePort(ing.Spec.DefaultBackend)
-		err := c.addDefaultHostBackend(source, ing.Namespace+"/"+svcName, svcPort, annHost, annBack)
+		svcName, svcPort, err := readServiceNamePort(ing.Spec.DefaultBackend)
+        if err != nil {
+			c.logger.Warn("skipping default backend of ingress '%s': %v", fullIngName, err)
+		}
+		err = c.addDefaultHostBackend(source, ing.Namespace+"/"+svcName, svcPort, annHost, annBack)
 		if err != nil {
 			c.logger.Warn("skipping default backend of ingress '%s': %v", fullIngName, err)
 		}
@@ -136,7 +139,11 @@ func (c *converter) syncIngress(ing *extensions.Ingress) {
 				c.logger.Warn("skipping redeclared path '%s' of ingress '%s'", uri, fullIngName)
 				continue
 			}
-			svcName, svcPort := readServiceNamePort(&path.Backend)
+            svcName, svcPort, err := readServiceNamePort(&path.Backend)
+			if err != nil {
+				c.logger.Warn("skipping backend config of %v: %v", source, err)
+				continue
+			}
 			fullSvcName := ing.Namespace + "/" + svcName
 			backend, err := c.addBackend(source, hostname+uri, fullSvcName, svcPort, annBack)
 			if err != nil {
@@ -342,8 +349,14 @@ func (c *converter) readAnnotations(annotations map[string]string) (annHost, ann
 	return annHost, annBack
 }
 
-func readServiceNamePort(backend *extensions.IngressBackend) (string, string) {
+func readServiceNamePort(backend *extensions.IngressBackend) (string, string, error) {
+    if backend.Service == nil {
+		return "", "", fmt.Errorf("resource backend is not supported yet")
+	}
 	serviceName := backend.Service.Name
-	servicePort := backend.Service.Port.String()
-	return serviceName, servicePort
+	servicePort := backend.Service.Port.Name
+    if servicePort == "" {
+        servicePort = strconv.Itoa(int(backend.Service.Port.Number))
+    }
+	return serviceName, servicePort, nil
 }
